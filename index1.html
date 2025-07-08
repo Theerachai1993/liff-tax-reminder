@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ลงทะเบียนภาษีรถยนต์</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    label { display:block; margin-top:15px; font-weight:bold; }
+    input, button { width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; }
+    button { background:#06c755; color:#fff; border:none; font-size:16px; margin-top:20px; }
+    #userIdBox { display:none; margin-top:10px; background:#fff3cd; padding:10px; border-left:5px solid #ffc107; }
+  </style>
+</head>
+<body>
+  <h2>📋 ลงทะเบียนภาษีรถยนต์</h2>
+
+  <label>ชื่อ-นามสกุล</label>
+  <input type="text" id="fullname">
+
+  <label>ทะเบียนรถ</label>
+  <input type="text" id="plate">
+
+  <label>วันหมดอายุภาษี</label>
+  <input type="date" id="expiry">
+
+  <button id="getUserIdBtn">📥 ดึง LINE userId</button>
+  <div id="userIdBox">User ID: <span id="userIdDisplay"></span></div>
+  <input type="hidden" id="userId">
+
+  <button id="submitBtn">✅ ส่งข้อมูล</button>
+
+  <script>
+    async function initLIFF() {
+      await liff.init({ liffId: "2007712329-lJ4Jj8pj" });
+      if (!liff.isLoggedIn()) liff.login();
+    }
+    document.getElementById("getUserIdBtn").addEventListener("click", async () => {
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+      document.getElementById("userId").value = userId;
+      document.getElementById("userIdDisplay").textContent = userId;
+      document.getElementById("userIdBox").style.display = "block";
+    });
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const data = {
+        fullname: document.getElementById("fullname").value,
+        plate: document.getElementById("plate").value,
+        expiry: document.getElementById("expiry").value,
+        userId: document.getElementById("userId").value
+      };
+      if (!data.fullname || !data.plate || !data.expiry || !data.userId) {
+        alert("กรุณากรอกข้อมูลให้ครบ");
+        return;
+      }
+      await fetch("https://liff.line.me/2007712329-lJ4Jj8pj", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      alert("✅ ส่งข้อมูลเรียบร้อย");
+      liff.closeWindow();
+    });
+    initLIFF();
+  </script>
+</body>
+</html>
